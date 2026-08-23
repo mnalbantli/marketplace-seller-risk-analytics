@@ -1,0 +1,15 @@
+# Raw data (large, not tracked in git)
+raw_data/
+
+# Logs
+logs/
+olist_seller_risk/logs/
+
+# dbt artifacts
+olist_seller_risk/target/
+olist_seller_risk/dbt_packages/
+olist_seller_risk/logs/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,14 @@
+version: 2
+
+sources:
+  - name: raw
+    database: olist_project
+    schema: raw
+    tables:
+      - name: sellers
+      - name: orders
+      - name: order_items
+      - name: products
+      - name: customers
+      - name: qualified_leads
+      - name: closed_deals
