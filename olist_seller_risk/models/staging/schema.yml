@@ -53,3 +53,31 @@ models:
         description: "English translation of the product category. Renamed from product_category_name_english."
         tests:
           - not_null
+
+  - name: stg_order_items
+    description: "Cleaned order-item records from raw Olist order_items table. Grain is (order_id, order_item_id) — see tests/assert_stg_order_items_unique_grain.sql for the composite-key uniqueness check. Filters out ~32,951 phantom rows (WHERE order_id IS NOT NULL) that are a join/union artifact upstream, not real data. Dropped shipping_limit_date and all 8 product-attribute columns (all NULL on every real row here; category comes from stg_products/stg_category_translation instead). This is the join point connecting orders to sellers, and the source of price/freight_value for GMV."
+    columns:
+      - name: order_id
+        description: "Order this line item belongs to. FK to stg_orders."
+        tests:
+          - not_null
+      - name: order_item_id
+        description: "Line item sequence number within the order (1-21 observed)."
+        tests:
+          - not_null
+      - name: product_id
+        description: "Product sold in this line item. FK to stg_products."
+        tests:
+          - not_null
+      - name: seller_id
+        description: "Seller responsible for this line item. FK to stg_sellers — the orders-to-sellers join point."
+        tests:
+          - not_null
+      - name: price
+        description: "Item price. Component of GMV."
+        tests:
+          - not_null
+      - name: freight_value
+        description: "Freight/shipping cost for this line item. Component of GMV."
+        tests:
+          - not_null
