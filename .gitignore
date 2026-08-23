@@ -10,6 +10,9 @@ olist_seller_risk/target/
 olist_seller_risk/dbt_packages/
 olist_seller_risk/logs/
 
+# Private notes
+LESSONS.md
+
 # OS
 .DS_Store
 Thumbs.db
