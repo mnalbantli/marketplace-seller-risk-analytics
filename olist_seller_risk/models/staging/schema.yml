@@ -1,0 +1,31 @@
+version: 2
+
+models:
+  - name: stg_sellers
+    description: "Cleaned seller records from raw Olist sellers table. Zip code prefix intentionally dropped — no current analytical use."
+    columns:
+      - name: seller_id
+        description: "Unique identifier for a seller (marketplace account)."
+        tests:
+          - unique
+          - not_null
+      - name: seller_city
+        description: "City where the seller is registered."
+      - name: seller_state
+        description: "State where the seller is registered."
+
+  - name: stg_orders
+    description: "Cleaned order records from raw Olist orders table. Customer_ID, Order Approved At, Order Delivered Carrier Date, and Order Estimated Date removed since no current analytical use."
+    columns:
+      - name: order_id
+        description: "Unique identifier for orders (marketplace account)."
+        tests:
+          - unique
+          - not_null
+      - name: order_purchase_timestamp
+        description: "Time when the order created by the customer."
+      - name: order_status
+        description: "Tells whether the order: delivered, invoiced, shipped, processing, unavailable, canceled, created, or approved"
+        tests:
+          - accepted_values:
+              values: ['delivered', 'invoiced', 'shipped', 'processing', 'unavailable', 'canceled', 'created', 'approved']
