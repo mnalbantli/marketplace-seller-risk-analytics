@@ -10,8 +10,8 @@ olist_seller_risk/target/
 olist_seller_risk/dbt_packages/
 olist_seller_risk/logs/
 
-# Private notes
-LESSONS.md
+# Private notes (candidate's working docs, kept local-only)
+mds/
 
 # OS
 .DS_Store
