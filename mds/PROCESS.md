@@ -1,0 +1,49 @@
+## Data Structure Discovery: `products` Table
+Initial assumption: `order_items` already carried product attributes 
+(same columns present), making a separate `products` model redundant.
+Verification (aggregate null check) showed the opposite: `product_category_name` 
+is NULL on every real order row in `order_items` — populated only on 
+32,951 disconnected phantom rows with no order_id. `products` is the only 
+real source for category data on actual transactions. Kept as a separate 
+staged model, joined in intermediate.
+
+# Driver Selection — Process & Rationale
+
+## Business Question
+Which B2B marketplace seller segments are at risk of churning, and what
+observable, associative patterns characterize that risk?
+
+## Screening Criteria for Candidate Drivers
+1. **Coverage** — does this variable exist for most sellers, or a small subset?
+2. **Confounding risk** — could this be a proxy for something else, not a real driver?
+3. **Actionability** — if real, can the business actually act on it?
+4. **Cost to compute** — already staged, or needs new derivation?
+
+## Candidates Considered
+
+| Driver | Coverage | Confounding Risk | Actionability | Decision |
+|---|---|---|---|---|
+| Acquisition channel | ~27% (842/3,095) | High — attributed sellers are self-selected | Medium | **Secondary, explicitly caveated — not a headline driver** |
+| Product category | 100% | Lower | High | **Primary** |
+| Geography | 100% | Medium — likely a proxy for freight/fulfillment | High, with mechanism | **Primary, paired with fulfillment data** |
+| Seller tenure | 100% | Low | Medium | **Primary** |
+| Order frequency trend | 100% | Low — closest to directly causal | High | **Primary** |
+
+## Final Driver Set
+- Product category mix
+- Geography (state/city)
+- Seller tenure (time since first order)
+- Order frequency trend (declining vs. stable cadence)
+- Acquisition channel — included as a secondary lens, restricted to the
+  27% funnel-attributed subset, with selection bias disclosed
+
+## Why This Matters
+Coverage was the deciding factor over personal interest or intuition — a
+driver that only exists for a quarter of the population can't support a
+platform-wide "why," no matter how interesting it is.
+
+## Note on Reasoning: Correlational, Not Causal
+Per CLAUDE.md's locked framing discipline — every driver above is an
+associative pattern candidate, not a proven cause of churn. Final writeups
+must state findings as "sellers with X characteristic show elevated churn
+risk," never "X causes churn."
