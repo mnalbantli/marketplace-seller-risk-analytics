@@ -29,3 +29,27 @@ models:
         tests:
           - accepted_values:
               values: ['delivered', 'invoiced', 'shipped', 'processing', 'unavailable', 'canceled', 'created', 'approved']
+
+  - name: stg_products
+    description: "Cleaned product records from raw Olist products table. Only product_id and product_category_name kept — physical/listing attribute columns (name/description length, photo count, weight, dimensions) dropped since they don't answer the seller-risk business question."
+    columns:
+      - name: product_id
+        description: "Unique identifier for a product."
+        tests:
+          - unique
+          - not_null
+      - name: category_name
+        description: "Product category (original, untranslated form). Renamed from product_category_name to align join key with stg_category_translation. NULL for ~610 products — left as-is, no imputation. This is the only source for category; order_items cannot backfill it (category is NULL on every real order row there)."
+
+  - name: stg_category_translation
+    description: "Category name translation reference (Portuguese to English), loaded via dbt seed from the real Olist product_category_name_translation.csv (not in the raw schema — dbt-managed seed, referenced via ref() not source())."
+    columns:
+      - name: category_name
+        description: "Product category, original (Portuguese) form. Renamed from product_category_name to align join key with stg_products."
+        tests:
+          - unique
+          - not_null
+      - name: category_name_english
+        description: "English translation of the product category. Renamed from product_category_name_english."
+        tests:
+          - not_null
