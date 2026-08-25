@@ -15,3 +15,13 @@ that can repeat per parent record.
 **What I hit:** Can't test singular tests like combination, need to use SQL queries under tests.
 **What it means:** Generic tests can be done under schema.yml with commands, but singular tests require a SQL freedom. 
 
+# 08/24/2026 - Entry — Trend Window Sizing
+What I hit: I needed to decide how many days count as "recent" vs. "prior" when checking if a seller's ordering is declining — a specific number, with no formula to just look up.
+
+What it means: picking a window is a tradeoff, not a calculation. Too short, and normal random gaps between orders get mistaken for a real decline — a healthy seller can easily have zero orders in a short window just by chance. Too long, and you catch real declines too late to act on them, or lose the ability to call anything "recent" at all.
+
+How I resolved it: I already knew the typical seller's real order cadence (median ~6.5 days, computed correctly at the per-seller level — see the earlier grain/aggregation lesson). I used that as a ruler: a window of roughly 4-6x that typical gap (~30-45 days) is long enough that a healthy seller would normally place several orders inside it, so an empty stretch that long is much more likely to be a real signal than noise — while still being short enough to count as "recent."
+
+Where else this matters: any time I need to define a "look-back window" for detecting a change in behavior (declining engagement, slowing usage, dropping activity) — anchor the window size to the entity's own normal behavior/cadence, don't pick a round number out of habit. Be ready to explain the tradeoff (false alarms vs. catching it late), not just state the number.
+
+

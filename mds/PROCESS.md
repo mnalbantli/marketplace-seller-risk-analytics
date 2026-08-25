@@ -47,3 +47,14 @@ Per CLAUDE.md's locked framing discipline — every driver above is an
 associative pattern candidate, not a proven cause of churn. Final writeups
 must state findings as "sellers with X characteristic show elevated churn
 risk," never "X causes churn."
+
+## Category Concentration — NULL Handling
+Checked GMV exposure of NULL-category order_items before deciding to exclude 
+them: NULL-category items account for ~1.3% of total marketplace GMV 
+(179,535 / 13,591,644). Excluding them entirely (numerator and denominator) 
+from category concentration calculations is a safe simplification — the 
+excluded volume is small enough that it won't materially distort any 
+seller's concentration score, except potentially for a small number of 
+individual sellers with unusually high NULL-category exposure (not yet 
+checked at the seller level — worth a caveat if a specific seller's 
+concentration score looks unreliable during driver analysis).
