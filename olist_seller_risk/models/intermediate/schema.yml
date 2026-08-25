@@ -1,0 +1,31 @@
+version: 2
+
+models:
+  - name: int_seller_order_activity
+    description: "One row per seller, aggregating stg_orders joined to stg_order_items on order_id. Reference date is MAX(order_purchase_timestamp) across the whole dataset, computed once and reused for recency_days and the two 30-day trend windows. order_status is bucketed into 'delivered', 'cancelled_unavailable' (canceled, unavailable), and 'unresolved_unknown' (invoiced, shipped, processing, created, approved). GMV and order_count are delivered-only. cancellation_rate and unresolved_rate are each bucket's distinct order count over total distinct order count for the seller. orders_last_30d/orders_prior_30d are delivered order counts in the two 30-day windows immediately before the reference date, and are NULL unless trend_eligible (delivered order_count >= 4)."
+    columns:
+      - name: seller_id
+        description: "Unique identifier for a seller (marketplace account). Grain of this model."
+        tests:
+          - unique
+          - not_null
+      - name: gmv
+        description: "SUM(price) across delivered orders only."
+        tests:
+          - not_null
+      - name: order_count
+        description: "COUNT(DISTINCT order_id) across delivered orders only."
+        tests:
+          - not_null
+      - name: cancellation_rate
+        description: "Distinct cancelled_unavailable order count / distinct total order count for the seller."
+      - name: unresolved_rate
+        description: "Distinct unresolved_unknown order count / distinct total order count for the seller."
+      - name: recency_days
+        description: "Reference date minus the seller's last delivered order's order_purchase_timestamp, in days — same date basis as reference_date (days since the order was placed, not since it arrived). NULL if the seller has no delivered orders."
+      - name: trend_eligible
+        description: "True if the seller's delivered order_count >= 4."
+      - name: orders_last_30d
+        description: "Delivered order count in the 30 days immediately before (and including) the reference date. NULL if trend_eligible is false."
+      - name: orders_prior_30d
+        description: "Delivered order count in the 30 days before orders_last_30d's window. NULL if trend_eligible is false."
