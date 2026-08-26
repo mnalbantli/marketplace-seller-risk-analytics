@@ -1,0 +1,41 @@
+version: 2
+
+models:
+  - name: mart_seller_health
+    description: "Feature table for the churn-risk model (CLAUDE.md Definition-of-Done item 3/4) — does NOT yet include a churn risk score or GMV-at-risk; those are model outputs joined in later. One row per seller_id, matching int_seller_order_activity's population exactly (3,095 sellers, confirmed identical to stg_sellers — no zero-order population exists, so no sellers are added or dropped by any join below). Base is int_seller_order_activity. Left-joined to int_seller_category_mix, collapsed to one row per seller: top_category is the category with the highest category_gmv for that seller, ties broken alphabetically by category_name (deterministic/stable across runs only — carries no business meaning; as of 2026-08-25, 3 sellers have an exact category_gmv tie). category_concentration_pct is carried through as-is from that top row's category_gmv_pct (already the top category's GMV over the seller's total known-category GMV — not recomputed here). Sellers absent from int_seller_category_mix entirely (all-NULL-category sales, ~1.3% of marketplace GMV excluded per PROCESS.md) get NULL for both fields, no stub row. Left-joined to int_seller_acquisition on seller_id: origin stays NULL for sellers with no funnel match (~88% of the transacting population, per PROCESS.md's corrected coverage finding). Left-joined to stg_sellers for seller_city/seller_state."
+    columns:
+      - name: seller_id
+        description: "Unique identifier for a seller (marketplace account). Grain of this model."
+        tests:
+          - unique
+          - not_null
+      - name: gmv
+        description: "SUM(price) across delivered orders only. From int_seller_order_activity."
+        tests:
+          - not_null
+      - name: order_count
+        description: "COUNT(DISTINCT order_id) across delivered orders only. From int_seller_order_activity."
+        tests:
+          - not_null
+      - name: cancellation_rate
+        description: "Distinct cancelled_unavailable order count / distinct total order count for the seller. From int_seller_order_activity."
+      - name: unresolved_rate
+        description: "Distinct unresolved_unknown order count / distinct total order count for the seller. From int_seller_order_activity."
+      - name: recency_days
+        description: "Reference date minus the seller's last delivered order's order_purchase_timestamp, in days. NULL if the seller has no delivered orders. From int_seller_order_activity."
+      - name: trend_eligible
+        description: "True if the seller's delivered order_count >= 4. From int_seller_order_activity."
+      - name: orders_last_30d
+        description: "Delivered order count in the 30 days immediately before (and including) the reference date. NULL if trend_eligible is false. From int_seller_order_activity."
+      - name: orders_prior_30d
+        description: "Delivered order count in the 30 days before orders_last_30d's window. NULL if trend_eligible is false. From int_seller_order_activity."
+      - name: top_category
+        description: "The seller's highest-GMV product category, from int_seller_category_mix. Ties broken alphabetically by category_name — deterministic only, not business-meaningful. NULL if the seller has no known-category sales (absent from int_seller_category_mix)."
+      - name: category_concentration_pct
+        description: "top_category's share of the seller's total known-category GMV (carried through from int_seller_category_mix.category_gmv_pct on the top-category row, not recomputed). NULL if the seller has no known-category sales."
+      - name: origin
+        description: "Acquisition channel (e.g. social, paid_search, organic_search, email) from int_seller_acquisition. NULL for sellers with no funnel-attribution match (~88% of the transacting population) — secondary/caveated driver, see PROCESS.md."
+      - name: seller_city
+        description: "City where the seller is registered. From stg_sellers."
+      - name: seller_state
+        description: "State where the seller is registered. From stg_sellers."
