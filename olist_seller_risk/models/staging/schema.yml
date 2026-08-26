@@ -81,3 +81,28 @@ models:
         description: "Freight/shipping cost for this line item. Component of GMV."
         tests:
           - not_null
+
+  - name: stg_qualified_leads
+    description: "Cleaned marketing-qualified-lead records from raw Olist qualified_leads table. Only mql_id and origin kept — first_contact_date and landing_page_id dropped, no current analytical use. This is the acquisition-channel (origin) source for the funnel-attribution driver; only ~842 of 8,000 leads here go on to close as a seller (see stg_closed_deals)."
+    columns:
+      - name: mql_id
+        description: "Unique identifier for a marketing-qualified lead."
+        tests:
+          - unique
+          - not_null
+      - name: origin
+        description: "Acquisition channel the lead originated from (e.g. social, paid_search, organic_search, email). NULL on ~60 of 8,000 rows — left as-is, no imputation."
+
+  - name: stg_closed_deals
+    description: "Cleaned closed-deal records from raw Olist closed_deals table — the subset of qualified_leads that converted into a seller. Only mql_id and seller_id kept; sdr_id, sr_id, won_date, business_segment, lead_type, and the remaining sales-qualification columns dropped, no current analytical use (business_segment/lead_type specifically reviewed and cut per PROCESS.md's driver-screening criteria). 842 rows, one per seller_id and one per mql_id — but only 380 of those 842 seller_ids actually exist in stg_sellers (real transacting sellers); the other 462 reference sellers with no order/transaction data anywhere else in this project. This is the funnel-attribution join point (mql_id -> stg_qualified_leads for origin)."
+    columns:
+      - name: mql_id
+        description: "Marketing-qualified lead that converted. FK to stg_qualified_leads."
+        tests:
+          - unique
+          - not_null
+      - name: seller_id
+        description: "Seller this closed deal produced. Not guaranteed to exist in stg_sellers — see model description."
+        tests:
+          - unique
+          - not_null

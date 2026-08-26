@@ -49,3 +49,14 @@ models:
         description: "category_gmv divided by this seller's total GMV summed across all their known-category rows in this model (per-seller denominator)."
         tests:
           - not_null
+
+  - name: int_seller_acquisition
+    description: "SECONDARY / CAVETED DRIVER, not a headline driver — see PROCESS.md's driver-screening table. One row per seller_id, only for sellers present in stg_closed_deals (842 rows — the marketing-funnel-attributed subset), joined to stg_qualified_leads on mql_id to bring in origin (acquisition channel). business_segment and lead_type deliberately excluded — reviewed against PROCESS.md's screening criteria and cut (same coverage ceiling as origin, weaker actionability, likely redundant with category concentration). No stub rows: a seller with no closed-deal record simply doesn't appear here, same pattern as int_seller_category_mix. Coverage caveat: of these 842 sellers, only 380 actually exist in stg_sellers (real transacting sellers) — the other 462 reference sellers with no order/transaction data anywhere else in this project and will never match anything downstream. All 842 rows are kept here regardless (no inner join to stg_sellers at this layer) — the mismatch is left to surface naturally wherever this model gets joined to the transacting-seller universe. origin is NULL on a handful of matched rows (4 of the 380 real-seller rows) and is kept as NULL, not excluded or imputed."
+    columns:
+      - name: seller_id
+        description: "Seller with a closed marketing-funnel deal. Grain of this model. Not guaranteed to exist in stg_sellers — see model description."
+        tests:
+          - unique
+          - not_null
+      - name: origin
+        description: "Acquisition channel (e.g. social, paid_search, organic_search, email) this seller's closed deal originated from. NULL on a small number of rows — kept as-is, no imputation."
