@@ -31,6 +31,24 @@ Feature encoding decisions (candidate-confirmed, 2026-08-25):
   - category_concentration_pct: NULLs get an explicit
     category_concentration_pct_missing indicator (1/0), then the
     underlying NULL is imputed to 0 only after that flag exists.
+
+Revision, 2026-08-25 — minimum-sample threshold for rare categories:
+  The first run of this model surfaced a real instability problem: 6 of
+  the top 8 coefficients by |magnitude| were categorical dummies backed by
+  single digits to low-20s of sellers (seller_state_PI = 1 seller,
+  top_category_artes_e_artesanato = 2 sellers) — large coefficients that
+  are very likely noise from tiny samples, not real signal. Per candidate
+  decision, this revisits the "top_category at full granularity" call
+  above: both top_category and seller_state now go through a
+  MIN_CATEGORY_SAMPLES = 20 threshold before one-hot encoding — any
+  category with fewer than 20 sellers (counted on the training split only,
+  to avoid leaking test-set composition into a feature-engineering choice)
+  is grouped into an explicit "other" bucket instead of getting its own
+  dummy column. The threshold is computed on X_train and applied
+  identically to X_test. Actual counts of categories affected and rows
+  reassigned to "other" are printed at runtime by bucket_rare_categories()
+  below (varies slightly run-to-run only insofar as the train/test split
+  composition does; with random_state=42 this is fully deterministic).
 """
 
 import json
@@ -64,6 +82,8 @@ NUMERIC_FEATURES = [
     "category_concentration_pct_missing",
 ]
 CATEGORICAL_FEATURES = ["top_category", "origin", "seller_state"]
+RARE_CATEGORY_BUCKET_COLUMNS = ["top_category", "seller_state"]
+MIN_CATEGORY_SAMPLES = 20
 
 
 def fetch_mart_seller_health() -> pd.DataFrame:
@@ -106,6 +126,35 @@ def prepare_features(df: pd.DataFrame) -> pd.DataFrame:
     df["top_category"] = df["top_category"].fillna("missing")
     df["origin"] = df["origin"].fillna("missing")
     return df
+
+
+def bucket_rare_categories(
+    X_train: pd.DataFrame,
+    X_test: pd.DataFrame,
+    columns: list,
+    min_samples: int,
+) -> tuple:
+    """Group categories with fewer than min_samples sellers (counted on the
+    training split only) into an explicit "other" bucket, for the given
+    columns. Applied identically to X_test using the training-set-derived
+    frequent-category set, so no test-set information leaks into the
+    grouping decision."""
+    X_train = X_train.copy()
+    X_test = X_test.copy()
+    for col in columns:
+        counts = X_train[col].value_counts()
+        frequent = set(counts[counts >= min_samples].index)
+        rare = set(counts[counts < min_samples].index)
+        n_rows_bucketed_train = int(X_train[col].isin(rare).sum())
+        n_rows_bucketed_test = int((~X_test[col].isin(frequent)).sum())
+        print(
+            f"  {col}: {len(rare)} of {len(counts)} categories fall below "
+            f"MIN_CATEGORY_SAMPLES={min_samples} (train), grouped into 'other' — "
+            f"{n_rows_bucketed_train} train rows, {n_rows_bucketed_test} test rows affected"
+        )
+        X_train[col] = X_train[col].where(X_train[col].isin(frequent), "other")
+        X_test[col] = X_test[col].where(X_test[col].isin(frequent), "other")
+    return X_train, X_test
 
 
 def report_top_coefficient_support(
@@ -158,6 +207,20 @@ def main() -> None:
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.20, stratify=y, random_state=42
     )
+
+    print(
+        f"\nBucketing rare categories (fewer than {MIN_CATEGORY_SAMPLES} sellers "
+        "in the training split) into 'other':"
+    )
+    X_train, X_test = bucket_rare_categories(
+        X_train, X_test, RARE_CATEGORY_BUCKET_COLUMNS, MIN_CATEGORY_SAMPLES
+    )
+    # apply the same training-derived bucketing to `labeled` itself, so the
+    # n_total column in the coefficient-support report below reflects
+    # post-bucketing category membership too (not the original raw values)
+    for col in RARE_CATEGORY_BUCKET_COLUMNS:
+        labeled.loc[X_train.index, col] = X_train[col]
+        labeled.loc[X_test.index, col] = X_test[col]
 
     # StandardScaler on numeric features is a standard preprocessing step for
     # logistic regression (keeps convergence stable, puts coefficients on a

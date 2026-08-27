@@ -2,136 +2,86 @@ Total sellers in mart_seller_health: 3095
 Excluding 125 'never-activated' sellers (recency_days IS NULL — no delivered orders ever) from train/test entirely.
 Baseline churn rate (post-exclusion population, n=2970): 77.9% labeled churned
 
+Bucketing rare categories (fewer than 20 sellers in the training split) into 'other':
+  top_category: 44 of 69 categories fall below MIN_CATEGORY_SAMPLES=20 (train), grouped into 'other' — 304 train rows, 68 test rows affected
+  seller_state: 12 of 20 categories fall below MIN_CATEGORY_SAMPLES=20 (train), grouped into 'other' — 66 train rows, 23 test rows affected
+
 === Baseline Logistic Regression — Test Set Metrics ===
 Test set size: 594 (stratified 80/20 split, random_state=42)
-Accuracy:  0.8047
-Precision: 0.8115
-Recall:    0.9762
-F1:        0.8863
-ROC-AUC:   0.7492
+Accuracy:  0.8013
+Precision: 0.8097
+Recall:    0.9741
+F1:        0.8843
+ROC-AUC:   0.7458
 
 Confusion matrix (rows=actual, cols=predicted; class order [0, 1]):
-[[ 26 105]
- [ 11 452]]
+[[ 25 106]
+ [ 12 451]]
 
 Baseline churn rate for context: 77.9% of the 2970 modeled sellers are labeled churned — read accuracy against this, not against 50%.
 
 === Coefficients (standardized numeric features; not yet interpreted) ===
 feature                                            coefficient
-intercept                                           1.2868
-cat__top_category_consoles_games                    1.4071
-num__order_count                                   -1.2861
-cat__top_category_bebidas                           1.1121
-cat__top_category_construcao_ferramentas_ferramentas -1.0880
-cat__top_category_artes_e_artesanato               -1.0357
-cat__top_category_alimentos                        -0.9824
-cat__origin_missing                                 0.8364
-cat__seller_state_PI                               -0.8236
-cat__top_category_moveis_sala                      -0.7273
-cat__top_category_portateis_cozinha_e_preparadores_de_alimentos -0.7099
-cat__top_category_malas_acessorios                  0.7013
-num__category_concentration_pct_missing             0.6888
-cat__top_category_cama_mesa_banho                  -0.6883
-cat__top_category_ferramentas_jardim                0.6726
-cat__seller_state_SP                               -0.6637
-cat__top_category_la_cuisine                       -0.6518
-cat__top_category_construcao_ferramentas_construcao -0.5964
-cat__seller_state_CE                                0.5770
-cat__top_category_cool_stuff                        0.5552
-cat__top_category_pet_shop                         -0.5411
-cat__top_category_livros_tecnicos                  -0.5407
-cat__top_category_market_place                      0.5269
-cat__top_category_industria_comercio_e_negocios     0.5255
-cat__top_category_fraldas_higiene                  -0.5243
-cat__top_category_construcao_ferramentas_iluminacao -0.5176
-cat__top_category_fashion_underwear_e_moda_praia    0.5111
-cat__top_category_construcao_ferramentas_seguranca -0.4917
-cat__top_category_eletrodomesticos                  0.4754
-cat__top_category_tablets_impressao_imagem          0.4709
-cat__top_category_moveis_escritorio                 0.4550
-num__cancellation_rate                              0.4507
-cat__top_category_cine_foto                        -0.4488
-cat__top_category_telefonia_fixa                    0.4445
-cat__origin_unknown                                -0.4180
-cat__origin_organic_search                         -0.4038
-cat__top_category_agro_industria_e_comercio        -0.3902
-cat__top_category_eletroportateis                   0.3827
-cat__seller_state_ES                                0.3800
-cat__top_category_fashion_roupa_feminina            0.3740
-cat__seller_state_PE                                0.3703
-cat__origin_social                                  0.3698
-num__unresolved_rate                                0.3628
-cat__origin_display                                -0.3607
-cat__top_category_beleza_saude                     -0.3591
-cat__top_category_alimentos_bebidas                 0.3509
-cat__origin_other                                  -0.3392
-cat__top_category_livros_interesse_geral            0.3328
-cat__seller_state_RJ                               -0.3323
-cat__top_category_portateis_casa_forno_e_cafe      -0.3282
-cat__top_category_audio                             0.3249
-cat__top_category_moveis_quarto                     0.3224
-cat__top_category_construcao_ferramentas_jardim     0.3185
-cat__top_category_relogios_presentes               -0.3174
-cat__seller_state_MS                                0.3090
-cat__seller_state_MT                                0.2779
-cat__origin_referral                                0.2748
-cat__seller_state_RN                                0.2692
-cat__top_category_livros_importados                 0.2688
-cat__top_category_artigos_de_natal                 -0.2626
-cat__seller_state_GO                                0.2584
-cat__top_category_telefonia                         0.2568
-num__category_concentration_pct                     0.2565
-cat__top_category_utilidades_domesticas            -0.2494
-cat__seller_state_DF                                0.2481
-cat__seller_state_MG                               -0.2348
-cat__top_category_bebes                             0.2266
-cat__top_category_pcs                              -0.2263
-cat__top_category_casa_construcao                   0.2240
-cat__seller_state_SC                               -0.2221
-cat__seller_state_PB                               -0.2120
-cat__top_category_artigos_de_festas                -0.2098
-cat__seller_state_PR                               -0.2046
-cat__origin_paid_search                             0.2000
-cat__top_category_musica                           -0.1884
-cat__top_category_fashion_calcados                 -0.1741
-cat__top_category_instrumentos_musicais             0.1693
-cat__origin_direct_traffic                         -0.1670
-num__gmv                                            0.1589
-cat__origin_email                                   0.1576
-cat__seller_state_RO                                0.1477
-cat__top_category_fashion_roupa_masculina           0.1415
-cat__top_category_sinalizacao_e_seguranca           0.1413
-cat__top_category_papelaria                         0.1407
-cat__top_category_moveis_decoracao                 -0.1084
-cat__seller_state_SE                                0.1055
-cat__top_category_flores                            0.1010
-cat__top_category_climatizacao                      0.0938
-cat__top_category_missing                           0.0934
-cat__top_category_casa_conforto                    -0.0866
-cat__top_category_eletronicos                       0.0803
-cat__top_category_fashion_bolsas_e_acessorios      -0.0726
-cat__top_category_dvds_blu_ray                      0.0711
-cat__top_category_esporte_lazer                     0.0695
-cat__seller_state_MA                               -0.0671
-cat__seller_state_BA                               -0.0661
-cat__top_category_perfumaria                       -0.0657
-cat__top_category_moveis_cozinha_area_de_servico_jantar_e_jardim  0.0652
-cat__top_category_brinquedos                        0.0647
-cat__top_category_moveis_colchao_e_estofado         0.0622
-cat__top_category_automotivo                        0.0590
-cat__top_category_informatica_acessorios            0.0468
-cat__top_category_fashion_esporte                   0.0378
-cat__seller_state_RS                                0.0331
-cat__top_category_artes                             0.0296
-cat__top_category_eletrodomesticos_2                0.0254
+intercept                                           1.1723
+num__order_count                                   -1.2658
+cat__top_category_bebidas                           1.0364
+cat__origin_missing                                 0.8608
+cat__top_category_cama_mesa_banho                  -0.7470
+cat__top_category_malas_acessorios                  0.7079
+num__category_concentration_pct_missing             0.6720
+cat__top_category_construcao_ferramentas_construcao -0.6419
+cat__top_category_ferramentas_jardim                0.6061
+cat__top_category_pet_shop                         -0.5981
+cat__seller_state_SP                               -0.5050
+cat__top_category_cool_stuff                        0.4896
+num__cancellation_rate                              0.4574
+cat__seller_state_other                             0.4465
+cat__origin_unknown                                -0.4176
+cat__top_category_beleza_saude                     -0.4145
+cat__origin_social                                  0.4008
+cat__seller_state_DF                                0.3982
+cat__seller_state_GO                                0.3964
+cat__origin_organic_search                         -0.3816
+num__unresolved_rate                                0.3732
+cat__top_category_relogios_presentes               -0.3578
+cat__top_category_eletroportateis                   0.3236
+cat__top_category_utilidades_domesticas            -0.3064
+cat__top_category_livros_interesse_geral            0.2958
+cat__origin_referral                                0.2920
+cat__origin_display                                -0.2790
+cat__origin_other                                  -0.2565
+num__category_concentration_pct                     0.2503
+cat__origin_email                                   0.1981
+cat__origin_paid_search                             0.1944
+cat__top_category_telefonia                         0.1784
+cat__top_category_bebes                             0.1778
+cat__seller_state_RJ                               -0.1756
+cat__top_category_moveis_decoracao                 -0.1678
+cat__top_category_other                            -0.1610
+cat__seller_state_RS                                0.1558
+num__gmv                                            0.1471
+cat__top_category_instrumentos_musicais             0.1389
+cat__top_category_fashion_bolsas_e_acessorios      -0.1347
+cat__origin_direct_traffic                         -0.1322
+cat__top_category_perfumaria                       -0.1197
+cat__seller_state_MG                               -0.1055
+cat__top_category_missing                           0.0970
+cat__top_category_papelaria                         0.0912
+cat__seller_state_SC                               -0.0912
+cat__seller_state_PR                               -0.0405
+cat__top_category_informatica_acessorios           -0.0183
+cat__top_category_eletronicos                       0.0064
+cat__top_category_automotivo                       -0.0022
+cat__top_category_brinquedos                       -0.0012
+cat__top_category_esporte_lazer                     0.0005
 
 === Sample Size Behind the Top 8 Coefficients (by |magnitude|) ===
 feature                                                coef  n_train  n_total
-cat__top_category_consoles_games                     1.4071       16       19
-num__order_count                                    -1.2861     2376     2970  (continuous, full n shown)
-cat__top_category_bebidas                            1.1121       20       20
-cat__top_category_construcao_ferramentas_ferramentas  -1.0880        6        8
-cat__top_category_artes_e_artesanato                -1.0357        2        3
-cat__top_category_alimentos                         -0.9824       12       14
-cat__origin_missing                                  0.8364     2075     2598
-cat__seller_state_PI                                -0.8236        1        1
+num__order_count                                    -1.2658     2376     2970  (continuous, full n shown)
+cat__top_category_bebidas                            1.0364       20       20
+cat__origin_missing                                  0.8608     2075     2598
+cat__top_category_cama_mesa_banho                   -0.7470      102      124
+cat__top_category_malas_acessorios                   0.7079       23       30
+num__category_concentration_pct_missing              0.6720     2376     2970  (continuous, full n shown)
+cat__top_category_construcao_ferramentas_construcao  -0.6419       40       51
+cat__top_category_ferramentas_jardim                 0.6061       77       96
