@@ -1,0 +1,39 @@
+==============================================================================
+GMV-AT-RISK — full-data refit for scoring purposes only.
+Held-out test-set metrics (accuracy/precision/recall/F1/ROC-AUC) are NOT recomputed here — see churn_model/results/baseline_run_2026-08-25.txt for the official model-performance numbers.
+==============================================================================
+Total sellers in mart_seller_health: 3095
+Excluding 125 'never-activated' sellers (recency_days IS NULL — no delivered orders ever) from train/test entirely.
+
+Refitting on the full modeled population: n=2970 (all sellers with a defined recency_days; the 125 never-activated sellers above are excluded, same as train_churn_model.py)
+
+Bucketing rare categories (full-population counts) into 'other':
+  top_category: 44 of 70 categories fall below MIN_CATEGORY_SAMPLES=20 (full population), grouped into 'other' — 350 rows affected
+  seller_state: 13 of 22 categories fall below MIN_CATEGORY_SAMPLES=20 (full population), grouped into 'other' — 67 rows affected
+
+=== GMV-at-Risk: Probability-Weighted vs. Binary Cutoff ===
+Total GMV across modeled population (n=2970): $13,221,498.11
+
+Binary cutoff estimate (is_churned = recency_days > 60):
+  GMV-at-risk: $6,664,456.45  (50.4% of total GMV)
+
+Probability-weighted estimate (full-data-refit predict_proba x gmv):
+  GMV-at-risk: $6,660,849.49  (50.4% of total GMV)
+
+Difference: $-3,606.96 (-0.0% points) — the probability-weighted figure reflects each seller's individual predicted risk instead of treating every 'churned' seller as fully at-risk and every 'active' seller as not at-risk at all.
+
+=== GMV-at-Risk by order_count vs. Marketplace Median (median=7.0, n=2970 modeled sellers) ===
+
+At-or-below median order_count:
+  Sellers: 1555
+  Total GMV: $982,074.04
+  Probability-weighted GMV-at-risk: $842,087.73 (85.7% of this bucket's own GMV)
+  Share of marketplace-wide weighted GMV-at-risk: 12.6%
+
+Above median order_count:
+  Sellers: 1415
+  Total GMV: $12,239,424.07
+  Probability-weighted GMV-at-risk: $5,818,761.76 (47.5% of this bucket's own GMV)
+  Share of marketplace-wide weighted GMV-at-risk: 87.4%
+
+(For reference: PROCESS.md's 'Verified Finding' shows churned sellers average $2,881 GMV / 17.2 orders vs. active sellers' $9,980 GMV / 88.4 orders — the breakdown above tests whether that concentration among low-volume sellers holds when weighted by continuous risk probability instead of the binary churned/active label.)

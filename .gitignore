@@ -13,6 +13,10 @@ olist_seller_risk/logs/
 # Credentials (repo-root profiles.yml, not ~/.dbt/)
 /profiles.yml
 
+# Python
+__pycache__/
+*.pyc
+
 # OS
 .DS_Store
 Thumbs.db

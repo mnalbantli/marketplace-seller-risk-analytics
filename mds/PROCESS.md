@@ -58,3 +58,26 @@ seller's concentration score, except potentially for a small number of
 individual sellers with unusually high NULL-category exposure (not yet 
 checked at the seller level — worth a caveat if a specific seller's 
 concentration score looks unreliable during driver analysis).
+
+## Verified Finding: Churn (recency > 60d) Concentrates Among Low-Volume Sellers
+Direct comparison (2026-08-26), not inferred:
+| Status | Sellers | Avg GMV | Avg Order Count |
+| Churned | 2,313 | $2,881 | 17.2 |
+| Active | 657 | $9,980 | 88.4 |
+
+Active sellers average ~3.5x the GMV and ~5x the order count of churned 
+sellers. This corroborates the model's strongest coefficient (order_count) 
+independently, via a direct group comparison rather than model output alone.
+
+## GMV-at-Risk: Rate vs. Dollar Concentration Diverge
+Low-volume sellers churn at a much higher rate (85.7% of their own GMV at 
+risk vs. 47.5% for high-volume sellers) — confirming the earlier per-seller 
+finding. But high-volume sellers hold 93% of total marketplace GMV ($12.2M 
+of $13.2M), so even their lower risk rate translates to 87.4% of total 
+dollars at risk, versus only 12.6% for the low-volume group.
+
+Both are correct simultaneously — a large percentage of a small pile is 
+still a smaller dollar figure than a small percentage of a huge pile. They 
+answer different business questions: "who is most likely to churn" (low-
+volume sellers) vs. "where should retention budget actually go" (high-
+volume sellers, since that's where the dollar exposure sits).
