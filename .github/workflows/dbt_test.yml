@@ -1,0 +1,45 @@
+name: dbt test
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dbt-databricks
+        run: pip install dbt-databricks
+
+      - name: Create profiles.yml
+        run: |
+          mkdir -p ~/.dbt
+          cat > ~/.dbt/profiles.yml << EOF
+          olist_seller_risk:
+            target: dev
+            outputs:
+              dev:
+                type: databricks
+                catalog: olist_project
+                schema: raw
+                host: ${{ secrets.DBT_DATABRICKS_HOST }}
+                http_path: ${{ secrets.DBT_DATABRICKS_HTTP_PATH }}
+                token: "${{ secrets.DBT_DATABRICKS_TOKEN }}"
+                threads: 4
+          EOF
+
+      - name: Run dbt test
+        working-directory: ./olist_seller_risk
+        run: |
+          dbt deps || true
+          dbt test
