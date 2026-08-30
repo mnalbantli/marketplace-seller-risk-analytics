@@ -101,6 +101,15 @@ portfolio project and will not be merged into churn_model/ or this mart —
 tracked separately, only noted here because the hypothesis above is what
 prompted the connection.
 
+## Dashboard Population Consistency Fix
+Found: the category-risk chart was including 125 "never-activated" sellers 
+(recency_days IS NULL) that the churn model explicitly excludes — these 
+sellers have zero delivered GMV, no category, and no meaningful recency, 
+inflating the "Unknown Category" bucket from a real ~56 sellers to an 
+apparent 181. Fixed by applying a recency_days IS NOT NULL filter 
+consistently across every dashboard sheet, matching the model's population 
+exactly.
+
 ## GMV-at-Risk: Rate vs. Dollar Concentration Diverge
 Low-volume sellers churn at a much higher rate (85.7% of their own GMV at 
 risk vs. 47.5% for high-volume sellers) — confirming the earlier per-seller 
