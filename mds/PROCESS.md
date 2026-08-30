@@ -69,6 +69,38 @@ Active sellers average ~3.5x the GMV and ~5x the order count of churned
 sellers. This corroborates the model's strongest coefficient (order_count) 
 independently, via a direct group comparison rather than model output alone.
 
+## Geography Driver: State-Level Risk Concentration
+Of 23 seller states, 9 have 20+ sellers (same n=20 threshold as the model's
+category/state bucketing):
+
+| State | Sellers | Risk Rate |
+|---|---|---|
+| GO | 40 | 82.87% |
+| DF | 30 | 74.78% |
+| MG | 244 | 59.48% |
+| ES | 23 | 80.05% |
+| RJ | 171 | 53.97% |
+| SP | 1,849 | 41.88% |
+| PR | 349 | 70.80% |
+| SC | 190 | 70.80% |
+| RS | 129 | 70.61% |
+
+Verified: SP alone (60% of all sellers) shows a 41.88% risk rate, versus
+65.72% for the other 8 qualifying states combined — a ~24-point gap,
+confirming this is a genuine "SP vs. everywhere else" pattern rather than
+a spread across many distinct states. Hypothesis (not yet confirmed,
+correlational only): this may reflect SP's status as Brazil's primary
+commercial/logistics hub rather than a pure geographic effect — plausibly
+a proxy for fulfillment infrastructure quality rather than location itself.
+
+Note: a related but SEPARATE research direction is being pursued with
+Dr. Bandara (RCOB Data Analytics), formally testing whether logistics/
+delivery-performance features improve churn prediction beyond business
+characteristics alone. That work is explicitly out of scope for this
+portfolio project and will not be merged into churn_model/ or this mart —
+tracked separately, only noted here because the hypothesis above is what
+prompted the connection.
+
 ## GMV-at-Risk: Rate vs. Dollar Concentration Diverge
 Low-volume sellers churn at a much higher rate (85.7% of their own GMV at 
 risk vs. 47.5% for high-volume sellers) — confirming the earlier per-seller 
