@@ -60,6 +60,7 @@ from train_churn_model import (
 )
 
 REPO_ROOT = Path(__file__).resolve().parent
+SEED_OUTPUT_PATH = REPO_ROOT.parent / "olist_seller_risk" / "seeds" / "seed_seller_risk_scores.csv"
 
 
 def bucket_rare_categories_full_population(
@@ -81,6 +82,24 @@ def bucket_rare_categories_full_population(
         )
         df[col] = df[col].where(df[col].isin(frequent), "other")
     return df
+
+
+def write_risk_scores_seed(labeled: pd.DataFrame, output_path: Path) -> None:
+    """Write seller_id, risk_score, gmv, gmv_at_risk_weighted to a dbt seed
+    CSV — feeds models/marts/mart_seller_risk_scores.sql. Covers only the
+    2,970 modeled sellers (the 125 never-activated sellers are excluded,
+    same population as the rest of this script). This is a static
+    snapshot: rerun this script + `dbt seed` + `dbt run` to refresh after
+    any model retrain."""
+    output = labeled[["seller_id", "risk_score", "gmv"]].copy()
+    output["gmv_at_risk_weighted"] = output["risk_score"] * output["gmv"]
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output.to_csv(output_path, index=False)
+    print(f"\nWrote {len(output)} rows to {output_path} (dbt seed source).")
+    print(
+        "Run `dbt seed --select seed_seller_risk_scores` to load it, then "
+        "`dbt run --select mart_seller_risk_scores` to build the mart."
+    )
 
 
 def main() -> None:
@@ -128,6 +147,8 @@ def main() -> None:
     model.fit(X_full, y_full)
 
     labeled["risk_score"] = model.predict_proba(X_full)[:, 1]
+
+    write_risk_scores_seed(labeled, SEED_OUTPUT_PATH)
 
     # --- Probability-weighted GMV-at-risk ---
     weighted_gmv_at_risk = (labeled["risk_score"] * labeled["gmv"]).sum()

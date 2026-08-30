@@ -39,3 +39,24 @@ models:
         description: "City where the seller is registered. From stg_sellers."
       - name: seller_state
         description: "State where the seller is registered. From stg_sellers."
+
+  - name: mart_seller_risk_scores
+    description: "One row per seller, n=2,970 — NOT the full 3,095-seller population in mart_seller_health. The 125 'never-activated' sellers (recency_days IS NULL in mart_seller_health — no delivered orders ever) are excluded here entirely, not zero-filled: they have no is_churned label and therefore no meaningful risk_score. This exclusion is a candidate decision from the churn_model/train_churn_model.py build (2026-08-25) that is NOT YET documented in PROCESS.md as of this model's creation — check PROCESS.md for a 'never-activated sellers' section; if present, it supersedes this note. Thin wrapper over the seed_seller_risk_scores seed, which is written by churn_model/gmv_at_risk.py: risk_score is predict_proba from a LogisticRegression pipeline refit on the FULL modeled population (in-sample scores, generated for consistent per-seller scoring — NOT the held-out test-set evaluation; see churn_model/results/baseline_run_2026-08-25.txt for the model's official accuracy/precision/recall/F1/ROC-AUC). gmv_at_risk_weighted = risk_score * gmv, labeled 'GMV exposure' per CLAUDE.md's framing discipline, never 'revenue loss' or 'profit impact' — no margin/profit data exists. This is a STATIC SNAPSHOT — the seed does not auto-refresh; rerun churn_model/gmv_at_risk.py, then `dbt seed --select seed_seller_risk_scores`, then `dbt run --select mart_seller_risk_scores` after any model retrain. Full methodology: churn_model/gmv_at_risk.py and churn_model/train_churn_model.py."
+    columns:
+      - name: seller_id
+        description: "Unique identifier for a seller. Grain of this model. Not present for the 125 never-activated sellers excluded from the modeled population — see model description."
+        tests:
+          - unique
+          - not_null
+      - name: risk_score
+        description: "predict_proba(is_churned=1) from the full-population-refit LogisticRegression pipeline (churn_model/gmv_at_risk.py). In-sample, continuous in [0,1] — a correlational risk indicator, not a causal claim."
+        tests:
+          - not_null
+      - name: gmv
+        description: "SUM(price) across delivered orders only, carried through from mart_seller_health."
+        tests:
+          - not_null
+      - name: gmv_at_risk_weighted
+        description: "risk_score * gmv — 'GMV exposure,' per CLAUDE.md's labeling discipline (never 'revenue loss'/'profit impact', since no margin data exists)."
+        tests:
+          - not_null
