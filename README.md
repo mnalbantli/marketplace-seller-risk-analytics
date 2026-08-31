@@ -18,8 +18,8 @@ A known limitation: only ~380 of the transacting seller population have acquisit
 
 ## Key Findings
 
-![Dashboard screenshot placeholder](assets/dashboard_screenshot.png)
-*(Placeholder — screenshot to be added.)*
+(assets/dashboard_screenshot.png)
+
 
 All findings below are **associative, not causal**. They describe characteristics that correlate with elevated churn risk, not proven drivers of it. Full detail and methodology for each finding: [PROCESS.md](mds/PROCESS.md).
 
