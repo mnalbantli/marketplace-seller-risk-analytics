@@ -24,4 +24,8 @@ How I resolved it: I already knew the typical seller's real order cadence (media
 
 Where else this matters: any time I need to define a "look-back window" for detecting a change in behavior (declining engagement, slowing usage, dropping activity) — anchor the window size to the entity's own normal behavior/cadence, don't pick a round number out of habit. Be ready to explain the tradeoff (false alarms vs. catching it late), not just state the number.
 
+## 08/31/2026 - Migration Checklists Need Full Inventories
+
+Migration checklists need full inventories, not partial ones. When I migrated Databricks workspaces, I re-uploaded the 7 core CSVs I remembered — but missed product_category_translation, since it wasn't on my original mental checklist. It only surfaced weeks later when CI ran against the new workspace and failed. Lesson: before any future migration, generate a full list of every table currently referenced across the whole project (grep for source() calls), not just the tables you remember using.
+
 
